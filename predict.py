@@ -61,6 +61,11 @@ def _move_to(self, device):
 class Predictor(BasePredictor):
     cached_models = inference
 
+    def setup(self):
+        inference.do_load("checkpoints/wav2lip.pth")
+        inference.do_load("checkpoints/wav2lip_gan.pth")
+        
+
     def predict(
         self,
         face: Path = Input(description="video/image that contains faces to use"),
@@ -91,7 +96,6 @@ class Predictor(BasePredictor):
         
         # Load the model based on the provided use_gan checkbox value
         checkpoint = "checkpoints/wav2lip_gan.pth" if use_gan else "checkpoints/wav2lip.pth"
-        inference.do_load(checkpoint)
         try:
             os.remove("results/result_voice.mp4")
         except FileNotFoundError:

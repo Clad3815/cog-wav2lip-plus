@@ -1,10 +1,8 @@
 numpy
 librosa
 opencv-python
---extra-index-url=https://download.pytorch.org/whl/cu118
-torch
---extra-index-url=https://download.pytorch.org/whl/cu118
-torchvision
+torch --extra-index-url=https://download.pytorch.org/whl/cu118
+torchvision --extra-index-url=https://download.pytorch.org/whl/cu118
 tqdm
 numba
 mediapipe
