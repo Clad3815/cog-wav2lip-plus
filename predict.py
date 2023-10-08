@@ -61,9 +61,6 @@ def _move_to(self, device):
 class Predictor(BasePredictor):
     cached_models = inference
 
-    def setup(self):
-        inference.do_load("checkpoints/wav2lip_gan.pth")
-
     def predict(
         self,
         face: Path = Input(description="video/image that contains faces to use"),
@@ -86,7 +83,15 @@ class Predictor(BasePredictor):
             description="Output video height. Best results are obtained at 480 or 720",
             default=480,
         ),
+        use_gan: bool = Input(
+            description="Use the GAN model? If not checked, the standard model is used.",
+            default=True
+        )
     ) -> Path:
+        
+        # Load the model based on the provided use_gan checkbox value
+        checkpoint = "checkpoints/wav2lip_gan.pth" if use_gan else "checkpoints/wav2lip.pth"
+        inference.do_load(checkpoint)
         try:
             os.remove("results/result_voice.mp4")
         except FileNotFoundError:
@@ -101,9 +106,9 @@ class Predictor(BasePredictor):
             raise ValueError(f'Unsupported audio format {audio_ext!r}')
 
         args = [
-            "--checkpoint_path", "checkpoints/wav2lip_gan.pth",
-            "--face", str(face),
-            "--audio", str(audio),
+            "--checkpoint_path", checkpoint,
+            "--face", f'"{str(face)}"',
+            "--audio", f'"{str(audio)}"',
             "--pads", *pads.split(" "),
             "--fps", str(fps),
             "--out_height", str(out_height),
@@ -125,8 +130,8 @@ class Predictor(BasePredictor):
                 "ffmpeg", "-y",
                 # "-vsync", "0", "-hwaccel", "cuda", "-hwaccel_output_format", "cuda",
                 "-stream_loop", "-1",
-                "-i", str(face),
-                "-i", str(audio),
+                "-i", f'"{str(face)}"', 
+                "-i", f'"{str(audio)}"',
                 "-shortest",
                 "-fflags", "+shortest",
                 "-max_interleave_delta", "100M",
